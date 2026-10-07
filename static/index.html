@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linux OS Agentic Troubleshooting Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐧</text></svg>">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">🐧</div>
+        <div class="brand-info">
+          <h2>Linux Agentic RAG</h2>
+          <span class="badge">v2.0 Self-RAG</span>
+        </div>
+      </div>
+
+      <div class="system-status-card" id="systemStatus">
+        <div class="status-header">
+          <span class="status-dot online"></span>
+          <span class="status-title">Agent Ready</span>
+        </div>
+        <div class="status-details">
+          <div class="detail-item"><span>OS:</span> <strong id="osBadge">Linux</strong></div>
+          <div class="detail-item"><span>RAG Knowledge:</span> <strong id="docsBadge">Loading...</strong></div>
+          <div class="detail-item"><span>Execution:</span> <strong>Safe Read-Only</strong></div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <h3>Quick Diagnostics</h3>
+        <div class="quick-actions">
+          <button class="quick-btn" data-query="Check my current system resources, load, memory, and disk usage">
+            ⚡ System Resources Overview
+          </button>
+          <button class="quick-btn" data-query="Scan system journal for recent critical and error logs">
+            🚨 Scan Critical Journal Errors
+          </button>
+          <button class="quick-btn" data-query="Check active listening TCP and UDP ports and bound processes">
+            🌐 Check Listening Ports
+          </button>
+          <button class="quick-btn" data-query="Check inode usage and disk capacity for space exhaustion">
+            💾 Inspect Disk & Inodes
+          </button>
+          <button class="quick-btn" data-query="Check kernel logs for Out Of Memory (OOM) killer events">
+            ⚠️ Check Kernel OOM Events
+          </button>
+          <button class="quick-btn" data-query="Why is a systemd service failing with status=203/EXEC?">
+            ⚙️ Debug status=203/EXEC
+          </button>
+        </div>
+      </div>
+
+      <footer class="sidebar-footer">
+        <p>Built with FastAPI • Hybrid RAG • Linux Tools</p>
+      </footer>
+    </aside>
+
+    <!-- Main Chat Workspace -->
+    <main class="chat-workspace">
+      <header class="workspace-header">
+        <div class="header-title">
+          <h1>Linux OS Diagnostics & Troubleshooting</h1>
+          <p>Autonomous root cause analysis, live system inspection, and step-by-step remediation.</p>
+        </div>
+        <div class="header-actions">
+          <button id="clearChatBtn" class="secondary-btn">Clear Chat</button>
+        </div>
+      </header>
+
+      <div class="messages-container" id="messagesContainer">
+        <!-- Welcome Message -->
+        <div class="message assistant">
+          <div class="message-avatar">🐧</div>
+          <div class="message-content">
+            <h3>Welcome to your Linux OS Agentic Assistant</h3>
+            <p>I can inspect your live system state, analyze systemd service crashes, investigate network/port conflicts, and diagnose memory/disk issues using a verified Linux runbook knowledge base.</p>
+            <p>Select a quick diagnostic above, or describe your system issue below.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Input Bar -->
+      <footer class="input-area">
+        <form id="chatForm" class="chat-form">
+          <textarea
+            id="queryInput"
+            placeholder="Describe your Linux issue (e.g., 'nginx won't start with exit code 1', 'port 80 already in use')..."
+            rows="1"
+            required
+          ></textarea>
+          <button type="submit" id="sendBtn" class="send-btn" aria-label="Send">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </form>
+      </footer>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,7 +1,0 @@
-logging:
-  level: WARNING
-security:
-  rate_limit_per_minute: 30
-server:
-  debug: false
-  host: 0.0.0.0

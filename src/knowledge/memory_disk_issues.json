@@ -1,0 +1,71 @@
+[
+  {
+    "id": "disk_inode_exhaustion",
+    "title": "Disk Error: No Space Left on Device (Inode Exhaustion)",
+    "category": "storage",
+    "symptoms": [
+      "No space left on device (while df -h shows free gigabytes)",
+      "Cannot create file: No space left on device",
+      "mkdir: cannot create directory: No space left on device"
+    ],
+    "root_cause": "Filesystem inodes are 100% consumed, even though storage space is available. This happens when applications create millions of tiny files (such as PHP session files, mail queues, cache directories, or docker overlay2 layers).",
+    "diagnostic_steps": [
+      "Check inode usage across filesystems: df -i",
+      "Find directories with the largest count of files: sudo find / -xdev -printf '%h\\n' | sort | uniq -c | sort -k 1 -n | tail -20",
+      "Check common culprit directories: ls -1 /var/spool/clientmqueue | wc -l"
+    ],
+    "remediation_commands": [
+      "# Delete accumulated tiny files in the culprit directory, e.g.:",
+      "find /var/cache/myapp/sessions -type f -mtime +7 -delete",
+      "# Clean up dangling Docker images/containers if using overlay2:",
+      "docker system prune -a --volumes"
+    ]
+  },
+  {
+    "id": "mem_oom_killer",
+    "title": "Memory Error: Out of Memory (OOM Killer Invoked)",
+    "category": "memory",
+    "symptoms": [
+      "Killed",
+      "Process terminated without error in logs",
+      "Out of memory: Kill process (PID) score or sacrifice child",
+      "invoked oom-killer: gfp_mask="
+    ],
+    "root_cause": "The Linux kernel ran completely out of available physical RAM and swap space. To prevent the entire operating system from crashing, the kernel's OOM Killer terminated the process with the highest oom_score (usually the largest memory consumer).",
+    "diagnostic_steps": [
+      "Check kernel logs for OOM invocation: sudo dmesg -T | grep -i -E 'oom|killed process'",
+      "Or check systemd journal for kernel messages: sudo journalctl -k -g oom -n 20 --no-pager",
+      "Check current memory and swap allocation: free -h",
+      "Identify the top memory consuming processes: ps aux --sort=-%mem | head -10"
+    ],
+    "remediation_commands": [
+      "# Add or increase swap space temporarily to absorb memory spikes:",
+      "sudo fallocate -l 4G /swapfile && sudo chmod 600 /swapfile && sudo mkswap /swapfile && sudo swapon /swapfile",
+      "# Set memory limits on systemd services using MemoryMax in unit file:",
+      "# e.g. [Service] MemoryMax=2G"
+    ]
+  },
+  {
+    "id": "disk_space_exhaustion",
+    "title": "Disk Error: Filesystem 100% Full",
+    "category": "storage",
+    "symptoms": [
+      "No space left on device",
+      "df -h shows 100% Use% on root partition /"
+    ],
+    "root_cause": "Filesystem block storage is completely filled by large log files, database transaction logs, core dumps, or package caches.",
+    "diagnostic_steps": [
+      "Identify which partition is full: df -h",
+      "Find top 10 largest directories on root: sudo du -h --max-depth=1 / 2>/dev/null | sort -hr | head -10",
+      "Find large uncompressed log files: sudo find /var/log -type f -size +500M",
+      "Check for deleted files still held open by processes: sudo lsof +L1"
+    ],
+    "remediation_commands": [
+      "# Vacuum systemd journal logs to free space immediately:",
+      "sudo journalctl --vacuum-size=200M",
+      "# Clean package manager cache:",
+      "sudo apt clean || sudo dnf clean all || sudo pacman -Sc",
+      "# If lsof shows deleted files held open, restart the holding process"
+    ]
+  }
+]

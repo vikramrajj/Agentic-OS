@@ -1,8 +1,0 @@
-Defaulting to user installation because normal site-packages is not writeable
-Requirement already satisfied: pytest-cov in c:\users\vikra\appdata\roaming\python\python312\site-packages (7.0.0)
-Requirement already satisfied: coverage>=7.10.6 in c:\users\vikra\appdata\roaming\python\python312\site-packages (from coverage[toml]>=7.10.6->pytest-cov) (7.10.7)
-Requirement already satisfied: pluggy>=1.2 in c:\users\vikra\appdata\roaming\python\python312\site-packages (from pytest-cov) (1.6.0)
-Requirement already satisfied: pytest>=7 in c:\users\vikra\appdata\roaming\python\python312\site-packages (from pytest-cov) (8.3.5)
-Requirement already satisfied: colorama in c:\users\vikra\appdata\roaming\python\python312\site-packages (from pytest>=7->pytest-cov) (0.4.6)
-Requirement already satisfied: iniconfig in c:\users\vikra\appdata\roaming\python\python312\site-packages (from pytest>=7->pytest-cov) (2.1.0)
-Requirement already satisfied: packaging in c:\users\vikra\appdata\roaming\python\python312\site-packages (from pytest>=7->pytest-cov) (23.2)

@@ -1,0 +1,67 @@
+[
+  {
+    "id": "net_address_already_in_use",
+    "title": "Network Error: Address Already in Use (Port Conflict)",
+    "category": "networking",
+    "symptoms": [
+      "bind: address already in use",
+      "bind() to 0.0.0.0:80 failed (98: Address already in use)",
+      "listen tcp :8080: bind: address already in use"
+    ],
+    "root_cause": "Another process is already listening on the requested TCP or UDP port, or an earlier instance of the application is stuck in TIME_WAIT or hanging in the background.",
+    "diagnostic_steps": [
+      "Identify the PID and process holding the port: sudo ss -tulpn | grep :<port_number>",
+      "Alternatively check with lsof: sudo lsof -i :<port_number>"
+    ],
+    "remediation_commands": [
+      "sudo kill -15 <PID>  # Graceful stop",
+      "sudo kill -9 <PID>   # Force terminate if hung",
+      "# Or reconfigure your application to bind to an alternative port in its config"
+    ]
+  },
+  {
+    "id": "net_dns_resolution_failure",
+    "title": "DNS Error: Temporary Failure in Name Resolution / Could Not Resolve Host",
+    "category": "networking",
+    "symptoms": [
+      "Temporary failure in name resolution",
+      "Could not resolve host",
+      "Name or service not known",
+      "curl: (6) Could not resolve host"
+    ],
+    "root_cause": "The system cannot query configured DNS nameservers. This is usually caused by broken /etc/resolv.conf symlinks, systemd-resolved service being stopped, network interfaces missing DNS gateway options, or restrictive outbound firewall rules on UDP port 53.",
+    "diagnostic_steps": [
+      "Check current DNS nameservers: cat /etc/resolv.conf",
+      "Check systemd-resolved status: resolvectl status || systemd-resolve --status",
+      "Test direct DNS query to public DNS: dig @8.8.8.8 google.com || nslookup google.com 1.1.1.1",
+      "Test ping to an IP address directly to verify network connectivity: ping -c 3 8.8.8.8"
+    ],
+    "remediation_commands": [
+      "sudo systemctl restart systemd-resolved",
+      "# If /etc/resolv.conf is broken or empty, configure a reliable fallback nameserver:",
+      "echo 'nameserver 1.1.1.1' | sudo tee /etc/resolv.conf"
+    ]
+  },
+  {
+    "id": "net_connection_refused",
+    "title": "Network Error: Connection Refused (ECONNREFUSED)",
+    "category": "networking",
+    "symptoms": [
+      "Connection refused",
+      "connect: connection refused",
+      "curl: (7) Failed to connect to host port: Connection refused"
+    ],
+    "root_cause": "The client reached the host IP, but no application is listening on that port, or the application is bound strictly to localhost (127.0.0.1) and rejecting external connections.",
+    "diagnostic_steps": [
+      "Verify the service is actually running: sudo systemctl status <service>",
+      "Check what IP address the service is listening on: sudo ss -tulpn | grep :<port>",
+      "Look for 127.0.0.1 vs 0.0.0.0 binding (localhost only vs all interfaces)",
+      "Check local firewall: sudo ufw status || sudo iptables -L -n -v"
+    ],
+    "remediation_commands": [
+      "sudo systemctl start <service>",
+      "# Change bind address from 127.0.0.1 to 0.0.0.0 in the application configuration if external access is needed",
+      "sudo ufw allow <port>/tcp"
+    ]
+  }
+]

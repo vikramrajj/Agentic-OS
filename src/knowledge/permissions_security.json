@@ -1,0 +1,46 @@
+[
+  {
+    "id": "sec_permission_denied_directory",
+    "title": "Permissions Error: Permission Denied (Directory Traversal)",
+    "category": "permissions",
+    "symptoms": [
+      "Permission denied",
+      "ls: cannot open directory: Permission denied",
+      "cat: /path/to/file: Permission denied"
+    ],
+    "root_cause": "A user or service cannot access a file because either the file lacks read permissions (r), or more commonly, one of the parent directories in the path lacks the execute (+x) search permission required for traversal.",
+    "diagnostic_steps": [
+      "Check file ownership and mode: ls -la /path/to/file",
+      "Check every parent directory's execute permission: namei -l /path/to/file",
+      "Check if user is a member of the required group: id <username>"
+    ],
+    "remediation_commands": [
+      "# Ensure parent directories have execute permission for traversal:",
+      "sudo chmod +x /path/to /path/to/parent",
+      "# Set read permission on the file itself:",
+      "sudo chmod +r /path/to/file",
+      "# Or adjust ownership if appropriate: sudo chown <user>:<group> /path/to/file"
+    ]
+  },
+  {
+    "id": "sec_readonly_filesystem",
+    "title": "Filesystem Error: Read-Only File System",
+    "category": "storage",
+    "symptoms": [
+      "Read-only file system",
+      "touch: cannot touch: Read-only file system",
+      "EXT4-fs error (device sdX): ... Remounting filesystem read-only"
+    ],
+    "root_cause": "The Linux kernel remounted the filesystem as read-only (ro) to protect against data corruption following disk I/O errors, SMART hardware failures, or metadata corruption.",
+    "diagnostic_steps": [
+      "Check mount options: mount | grep ' / '",
+      "Check dmesg for kernel I/O or filesystem errors: sudo dmesg -T | grep -i -E 'remount|ext4|xfs|error|i/o'",
+      "Check disk SMART health if smartctl is available: sudo smartctl -H /dev/sdX"
+    ],
+    "remediation_commands": [
+      "# Attempt temporary remount in rw mode (if hardware is sound):",
+      "sudo mount -o remount,rw /",
+      "# If corruption detected, schedule fsck on next boot: sudo touch /forcefsck && sudo reboot"
+    ]
+  }
+]

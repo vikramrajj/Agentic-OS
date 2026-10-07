@@ -31,6 +31,6 @@ desktop.ini
 OllamaSetup.exe
 releases/
 
-# Ignore pip cache
-pip-log.txt
-pip-delete-this-directory.txt
+# Testing & IDE caches
+.pytest_cache/
+.commandcode/

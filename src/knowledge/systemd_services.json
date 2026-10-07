@@ -1,0 +1,83 @@
+[
+  {
+    "id": "systemd_203_exec",
+    "title": "Systemd Error: status=203/EXEC (Service Failed to Start)",
+    "category": "systemd",
+    "symptoms": [
+      "code=exited, status=203/EXEC",
+      "Failed to start service",
+      "Process could not be executed",
+      "No such file or directory in ExecStart"
+    ],
+    "root_cause": "Systemd cannot execute the command specified in ExecStart. Common causes include: a typo in the binary path, missing execution permissions (+x), a missing script interpreter (e.g. #!/bin/bash or #!/usr/bin/env python3), Windows CRLF line endings in the script, or SELinux/AppArmor blocking execution.",
+    "diagnostic_steps": [
+      "Check the ExecStart line in the unit file: systemctl cat <service_name>",
+      "Verify the executable path exists and has executable permissions: ls -l /path/to/binary",
+      "Check the shebang line if it is a script: head -n 1 /path/to/script",
+      "Check for Windows carriage returns: file /path/to/script (look for 'CRLF line terminators')"
+    ],
+    "remediation_commands": [
+      "sudo chmod +x /path/to/binary",
+      "sed -i 's/\\r$//' /path/to/script  # Convert CRLF to LF",
+      "sudo systemctl daemon-reload && sudo systemctl restart <service_name>"
+    ]
+  },
+  {
+    "id": "systemd_217_user",
+    "title": "Systemd Error: status=217/USER (Failed at Step USER Spawning)",
+    "category": "systemd",
+    "symptoms": [
+      "code=exited, status=217/USER",
+      "Failed at step USER spawning",
+      "No such process or user"
+    ],
+    "root_cause": "The service unit file specifies a 'User=' or 'Group=' directive with a username or group that does not exist on the system.",
+    "diagnostic_steps": [
+      "Inspect the User and Group directives: grep -E '^(User|Group)=' /etc/systemd/system/<service_name>.service",
+      "Verify if the user exists: id <configured_user>"
+    ],
+    "remediation_commands": [
+      "sudo useradd --system --no-create-home --shell /usr/sbin/nologin <configured_user>",
+      "sudo systemctl daemon-reload && sudo systemctl restart <service_name>"
+    ]
+  },
+  {
+    "id": "systemd_start_limit_hit",
+    "title": "Systemd Error: Start Request Repeated Too Quickly (Start-Limit-Hit)",
+    "category": "systemd",
+    "symptoms": [
+      "start request repeated too quickly",
+      "Failed with result 'start-limit-hit'",
+      "Unit entered failed state"
+    ],
+    "root_cause": "The service has Restart=always or Restart=on-failure configured and crashed multiple times within the StartLimitIntervalSec window (default is usually 5 starts within 10 seconds). Systemd stops restarting to prevent infinite crash loops.",
+    "diagnostic_steps": [
+      "Check the exact application crash logs: journalctl -u <service_name> -n 50 --no-pager",
+      "Check the service configuration: systemctl show <service_name> -p StartLimitIntervalSec,StartLimitBurst"
+    ],
+    "remediation_commands": [
+      "sudo systemctl reset-failed <service_name>  # Clears the start rate limit counter",
+      "# Fix the underlying application crash seen in journalctl",
+      "sudo systemctl start <service_name>"
+    ]
+  },
+  {
+    "id": "systemd_status_1_failure",
+    "title": "Systemd Error: status=1/FAILURE (Application Crash on Startup)",
+    "category": "systemd",
+    "symptoms": [
+      "code=exited, status=1/FAILURE",
+      "Service exited with general failure code"
+    ],
+    "root_cause": "The binary executed successfully, but the application itself encountered an unhandled exception, syntax error, missing environment variable, or configuration error and terminated with return code 1.",
+    "diagnostic_steps": [
+      "View application stderr in journal: journalctl -u <service_name> -e -n 40",
+      "Test running the ExecStart command directly in the terminal as the service user to reproduce the crash"
+    ],
+    "remediation_commands": [
+      "# Check configuration file syntax (e.g. nginx -t or apachectl configtest)",
+      "# Verify environment file permissions and syntax if EnvironmentFile= is used",
+      "sudo systemctl restart <service_name>"
+    ]
+  }
+]
